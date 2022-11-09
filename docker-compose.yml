@@ -1,0 +1,21 @@
+version: '3.8'
+
+name: "test-app"
+
+services:
+  test-app-redis:
+    image: bitnami/redis:latest
+    container_name: test-app-redis
+    restart: always
+    ports:
+      - 6001:6379
+    environment:
+      REDIS_PASSWORD: 123
+  main:
+    build: ./
+    container_name: main
+    restart: always
+    ports:
+      - 6002:6002
+    depends_on:
+      - test-app-redis
