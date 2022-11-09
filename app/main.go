@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -55,10 +56,13 @@ func main() {
 func setRedis(rdb *redis.Client, number int) error {
 	return rdb.Set(context.Background(), "key", number, 0).Err()
 }
-func getRedis(rdb *redis.Client) (number int, err error) {
+func getRedis(rdb *redis.Client) (int, error) {
 	val, err := rdb.Get(context.Background(), "key").Result()
-	if err != nil {
-		return
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return 0, err
+	}
+	if val == "" {
+		return 0, nil
 	}
 	return strconv.Atoi(val)
 }

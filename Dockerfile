@@ -5,11 +5,11 @@ ENV GOPATH=/
 
 WORKDIR /root
 
-COPY ./ ./
+COPY ./app ./
 
 ENV REDIS_PORT=test-app-redis:6379
 
-RUN go build /root/app/main.go
+RUN go build -o ./main ./main.go
 
 EXPOSE 6002
 
