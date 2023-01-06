@@ -1,0 +1,11 @@
+FROM debian:11.6-slim
+
+WORKDIR /app
+
+COPY ./bin ./
+
+ENV REDIS_PASS=123
+ENV REDIS_PORT=6001
+ENV MODEL_PORT=6002
+
+CMD ["/app/main"]

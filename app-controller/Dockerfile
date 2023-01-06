@@ -1,0 +1,10 @@
+FROM debian:11.6-slim
+
+WORKDIR /app
+
+COPY ./bin ./
+
+ENV MODEL_PORT=6002
+ENV CONTROLLER_PORT=6003
+
+CMD ["/app/main"]
