@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "k8-test-app.fullname" . }}
+  name: {{ include "k8s-learn.fullname" . }}
   labels:
-    {{- include "k8-test-app.labels" . | nindent 4 }}
+    {{- include "k8s-learn.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "k8-test-app.selectorLabels" . | nindent 6 }}
+      {{- include "k8s-learn.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "k8-test-app.selectorLabels" . | nindent 8 }}
+        {{- include "k8s-learn.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "k8-test-app.serviceAccountName" . }}
+      serviceAccountName: {{ include "k8s-learn.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
