@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: app-controller
+  name: app-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: app-controller
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c
+        kompose.version: 1.28.0 (HEAD)
+      labels:
+        io.kompose.network/test-app-default: "true"
+        io.kompose.service: app-controller
+    spec:
+      containers:
+        - env:
+            - name: CONTROLLER_PORT
+              value: "6003"
+            - name: MODEL_HOST
+              value: "app-model"
+            - name: MODEL_PORT
+              value: "6002"
+          image: app-controller
+          name: app-controller
+          ports:
+            - containerPort: 6003
+          resources: {}
+      restartPolicy: Always
+status: {}

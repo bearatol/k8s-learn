@@ -1,0 +1,196 @@
+---
+# Source: docker-compose/templates/test-app-default-networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-app-default
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              io.kompose.network/test-app-default: "true"
+  podSelector:
+    matchLabels:
+      io.kompose.network/test-app-default: "true"
+---
+# Source: docker-compose/templates/app-controller-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: app-controller
+  name: app-controller
+spec:
+  ports:
+    - name: "6003"
+      port: 8888
+      targetPort: 6003
+  type: LoadBalancer
+  selector:
+    io.kompose.service: app-controller
+status:
+  loadBalancer: {}
+---
+# Source: docker-compose/templates/app-model-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: app-model
+  name: app-model
+spec:
+  ports:
+    - name: "6002"
+      port: 6002
+      targetPort: 6002
+  selector:
+    io.kompose.service: app-model
+status:
+  loadBalancer: {}
+---
+# Source: docker-compose/templates/test-app-redis-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: test-app-redis
+  name: test-app-redis
+spec:
+  ports:
+    - name: "6001"
+      port: 6001
+      targetPort: 6001
+  selector:
+    io.kompose.service: test-app-redis
+status:
+  loadBalancer: {}
+---
+# Source: docker-compose/templates/app-controller-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: app-controller
+  name: app-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: app-controller
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c
+        kompose.version: 1.28.0 (HEAD)
+      labels:
+        io.kompose.network/test-app-default: "true"
+        io.kompose.service: app-controller
+    spec:
+      containers:
+        - env:
+            - name: CONTROLLER_PORT
+              value: "6003"
+            - name: MODEL_PORT
+              value: "6002"
+          image: app-controller
+          name: app-controller
+          ports:
+            - containerPort: 6003
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+# Source: docker-compose/templates/app-model-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: app-model
+  name: app-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: app-model
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c
+        kompose.version: 1.28.0 (HEAD)
+      labels:
+        io.kompose.network/test-app-default: "true"
+        io.kompose.service: app-model
+    spec:
+      containers:
+        - env:
+            - name: MODEL_PORT
+              value: "6002"
+            - name: REDIS_PASS
+              value: "123"
+            - name: REDIS_PORT
+              value: "6001"
+          image: app-model
+          name: app-model
+          ports:
+            - containerPort: 6002
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+# Source: docker-compose/templates/test-app-redis-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: test-app-redis
+  name: test-app-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: test-app-redis
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c
+        kompose.version: 1.28.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/test-app-default: "true"
+        io.kompose.service: test-app-redis
+    spec:
+      containers:
+        - env:
+            - name: REDIS_PASSWORD
+              value: "123"
+            - name: REDIS_PORT_NUMBER
+              value: "6001"
+          image: bitnami/redis:6.2.8
+          name: test-app-redis
+          ports:
+            - containerPort: 6001
+          resources: {}
+      restartPolicy: Always
+status: {}

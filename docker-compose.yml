@@ -7,27 +7,35 @@ services:
     image: bitnami/redis:6.2.8
     container_name: test-app-redis
     restart: always
-    ports:
-      - 6001:6001
-    network_mode: "host"
+    expose:
+      - 6001
     environment:
       REDIS_PORT_NUMBER: 6001
       REDIS_PASSWORD: 123
   app-model:
-    build: ./app-model
+    build:
+      context: ./app-model
+      dockerfile: ./Dockerfile
     container_name: app-model
     restart: always
-    ports:
-      - 6002:6002
-    network_mode: "host"
+    expose:
+      - 6002
+    environment:
+      REDIS_PASS: 123
+      REDIS_HOST: test-app-redis
+      REDIS_PORT: 6001
+      MODEL_PORT: 6002
     depends_on:
       - test-app-redis
   app-controller:
-    build: ./app-controller
-    container_name: app-controller
+    build:
+      context: ./app-controller
     restart: always
     ports:
       - 6003:6003
-    network_mode: "host"
+    environment:
+      MODEL_HOST: app-model
+      MODEL_PORT: 6002
+      CONTROLLER_PORT: 6003
     depends_on:
       - app-model

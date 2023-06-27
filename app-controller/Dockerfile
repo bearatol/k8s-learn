@@ -4,7 +4,4 @@ WORKDIR /app
 
 COPY ./bin ./
 
-ENV MODEL_PORT=6002
-ENV CONTROLLER_PORT=6003
-
 CMD ["/app/main"]

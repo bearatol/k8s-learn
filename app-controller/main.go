@@ -13,6 +13,10 @@ import (
 )
 
 func main() {
+	modelHost, ok := os.LookupEnv("MODEL_HOST")
+	if !ok {
+		lg.Fatal("MODEL_HOST environment variable is not set")
+	}
 	modelPort, ok := os.LookupEnv("MODEL_PORT")
 	if !ok {
 		lg.Fatal("MODEL_PORT environment variable is not set")
@@ -22,7 +26,7 @@ func main() {
 		lg.Fatal("CONTROLLER_PORT environment variable is not set")
 	}
 
-	model := NewModel(modelPort)
+	model := NewModel(modelHost, modelPort)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
@@ -56,24 +60,28 @@ func main() {
 }
 
 type Model struct {
+	host,
 	port,
 	setNumber string
 }
 
-func NewModel(port string) *Model {
-	return &Model{port: port}
+func NewModel(host, port string) *Model {
+	return &Model{
+		host: host,
+		port: port,
+	}
 }
 
 func (m *Model) setRedis() error {
 	responseBody := bytes.NewBuffer([]byte("{\"number\": " + m.setNumber + "}"))
-	_, err := http.Post(fmt.Sprintf("http://0.0.0.0:%s/set", m.port), "application/json", responseBody)
+	_, err := http.Post(fmt.Sprintf("http://%s:%s/set", m.host, m.port), "application/json", responseBody)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func (m *Model) getRedis() (int, error) {
-	res, err := http.Get(fmt.Sprintf("http://0.0.0.0:%s/get", m.port))
+	res, err := http.Get(fmt.Sprintf("http://%s:%s/get", m.host, m.port))
 	if err != nil {
 		return 0, err
 	}

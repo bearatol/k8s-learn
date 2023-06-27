@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: test-app-redis
+  name: test-app-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: test-app-redis
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c
+        kompose.version: 1.28.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/test-app-default: "true"
+        io.kompose.service: test-app-redis
+    spec:
+      containers:
+        - env:
+            - name: REDIS_PASSWORD
+              value: "123"
+            - name: REDIS_PORT_NUMBER
+              value: "6001"
+          image: bitnami/redis:6.2.8
+          name: test-app-redis
+          ports:
+            - containerPort: 6001
+          resources: {}
+      restartPolicy: Always
+status: {}

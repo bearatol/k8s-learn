@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-app
+spec:
+  ports:
+    - protocol: TCP
+      port: 6001
+      targetPort: 6001
+  selector:
+    app: test-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-app-redis
+  template:
+    metadata:
+      labels:
+        app: test-app-redis
+    spec:
+      containers:
+        - name: test-app-redis
+          image: bitnami/redis:6.2.8
+          ports:
+            - containerPort: 6001
+          env:
+            - name: REDIS_PORT_NUMBER
+              value: "6001"
+            - name: REDIS_PASSWORD
+              value: "123"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-model
+  template:
+    metadata:
+      labels:
+        app: app-model
+    spec:
+      containers:
+        - name: app-model
+          build:
+            context: ./app-model
+            dockerfile: ./Dockerfile
+          ports:
+            - containerPort: 6002
+          env:
+            - name: REDIS_PASS
+              value: "123"
+            - name: REDIS_PORT
+              value: "6001"
+            - name: MODEL_PORT
+              value: "6002"
+          dependsOn:
+            - name: test-app-redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-controller
+  template:
+    metadata:
+      labels:
+        app: app-controller
+    spec:
+      containers:
+        - name: app-controller
+          build:
+            context: ./app-controller
+            dockerfile: ./Dockerfile
+          ports:
+            - containerPort: 6003
+          env:
+            - name: MODEL_PORT
+              value: "6002"
+            - name: CONTROLLER_PORT
+              value: "6003"
+          dependsOn:
+            - name: app-model

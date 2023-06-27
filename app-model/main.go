@@ -23,13 +23,17 @@ func main() {
 	if !ok {
 		lg.Fatal("REDIS_PORT environment variable is not set")
 	}
+	redisHost, ok := os.LookupEnv("REDIS_HOST")
+	if !ok {
+		lg.Fatal("REDIS_HOST environment variable is not set")
+	}
 	modelPort, ok := os.LookupEnv("MODEL_PORT")
 	if !ok {
 		lg.Fatal("MODEL_PORT environment variable is not set")
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "0.0.0.0:" + redisPort,
+		Addr:     redisHost + ":" + redisPort,
 		Password: redisPass,
 		DB:       0,
 	})

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c
+    kompose.version: 1.28.0 (HEAD)
+  labels:
+    io.kompose.service: app-model
+  name: app-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: app-model
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c
+        kompose.version: 1.28.0 (HEAD)
+      labels:
+        io.kompose.network/test-app-default: "true"
+        io.kompose.service: app-model
+    spec:
+      containers:
+        - env:
+            - name: MODEL_PORT
+              value: "6002"
+            - name: REDIS_PASS
+              value: "123"
+            - name: REDIS_HOST
+              value: "test-app-redis"
+            - name: REDIS_PORT
+              value: "6001"
+          image: app-model
+          name: app-model
+          ports:
+            - containerPort: 6002
+          resources: {}
+      restartPolicy: Always
+status: {}
